@@ -3,21 +3,91 @@
  * Task 1
  */
 function leafFiles(files) {
-    return [];
+    const leafFiles = [];
+    const parentFileID = [];
+
+    // Find all parent files
+    files.forEach(file => {
+        if (!parentFileID.includes(file.parent)) {
+            parentFileID.push(file.parent);
+        }
+    });
+
+    // If ID not in parent file, add to leafFiles
+    files.forEach(file => {
+        if (!parentFileID.includes(file.id)) {
+            leafFiles.push(file.name);
+        }
+    });
+
+    return leafFiles;
 }
 
 /**
  * Task 1
  */
 function kLargestCategories(files, k) {
-    return [];
+
+    const categoryCount = {};
+
+    // Count number of files in each category
+    files.forEach(file => {
+        file.categories.forEach(category => {
+            categoryCount[category] = (categoryCount[category] || 0) + 1;
+        });
+    });
+
+    // Sort category in descending order
+    const sortedCategories = Object.keys(categoryCount).sort((a, b) => {
+        const countCompare = categoryCount[b] - categoryCount[a];
+        // If same amount, sort alphabetically
+        return countCompare !== 0 ? countCompare : a.localeCompare(b);
+    });
+
+    // Return the first k categories
+    return sortedCategories.slice(0, k);
 }
 
 /**
  * Task 1
  */
 function largestFileSize(files) {
-    return 0;
+    let largestSize = 0;
+    const parentFiles = [];
+
+    // Find all parent files
+    files.forEach(file => {
+        if (!parentFiles.includes(file.parent)) {
+            parentFiles.push(file);
+        }
+    });
+
+    // Find the largest parent
+    parentFiles.forEach(file => {
+        const fileSize = parentFileSize(files, file.id);
+        if (fileSize > largestSize) {
+            largestSize = fileSize;
+        }
+    });
+    
+    return largestSize;
+}
+
+function parentFileSize(files, parentId) {
+    const leafFiles = files.filter(file => file.parent === parentId);
+    let totalSize = files.find(file => file.id === parentId).size;
+
+    // If we reach a leaf node, return size
+    if (leafFiles.length === 0) {
+        return totalSize;
+    }
+
+    // Accumulate size of leaf nodes
+    leafFiles.forEach(file => {
+        totalSize += parentFileSize(files, file.id);
+    });
+
+    return totalSize;
 }
 
 
